@@ -1,0 +1,36 @@
+body {
+  /* disable zooming */
+  touch-action: pan-x pan-y;
+}
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.card {
+  padding: 2em;
+}
+
+canvas {
+  border: 1px black solid;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.color-button > .color-div {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  border-width: 1px;
+}
+
+.color-button:nth-last-child(1) .color-div, .color-button:nth-last-child(2) .color-div, .color-button:nth-last-child(3) .color-div {
+  border-color: #CCCCCC !important;
+}
+
+.slider {
+  margin-top: 20px !important;
+}

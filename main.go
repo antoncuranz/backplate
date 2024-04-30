@@ -9,11 +9,42 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"image/jpeg"
+	_ "image/jpeg"
+	_ "image/png"
+	"io"
 	"log"
 	"net/http"
 	"os"
+	"strings"
+	"time"
 )
+
+const InboxDir = "./inbox"
+const ImageDir = "./images"
+const TmpImage = "./tmp.bmp"
+
+var index = 0
+
+func chooseImage() (string, error) {
+	inboxEntries, _ := os.ReadDir(InboxDir)
+
+	if len(inboxEntries) > 0 {
+		chosen := fmt.Sprintf("%s/%s", InboxDir, inboxEntries[0].Name())
+		fmt.Println(chosen)
+		return chosen, nil
+	}
+
+	entries, err := os.ReadDir(ImageDir)
+	if err != nil {
+		return "", err
+	}
+
+	chosen := fmt.Sprintf("%s/%s", ImageDir, entries[index].Name())
+	index = (index + 1) % len(entries)
+
+	fmt.Println(chosen)
+	return chosen, nil
+}
 
 func convert(srcPath string, dstPath string) error {
 	imageinput, err1 := os.Open(srcPath)
@@ -22,7 +53,7 @@ func convert(srcPath string, dstPath string) error {
 	outfile, err2 := os.Create(dstPath)
 	defer outfile.Close()
 
-	src, err3 := jpeg.Decode(imageinput)
+	src, _, err3 := image.Decode(imageinput)
 
 	if err := errors.Join(err1, err2, err3); err != nil {
 		return err
@@ -50,12 +81,12 @@ func convert(srcPath string, dstPath string) error {
 	return bmp.Encode(outfile, dithered)
 }
 
-var index = 0
-
 func consume(w http.ResponseWriter, req *http.Request) {
-	entries, err1 := os.ReadDir("./images")
-	chosen := fmt.Sprintf("./images/%s", entries[index].Name())
-	err2 := convert(chosen, "./tmp.bmp")
+	chosen, err1 := chooseImage()
+	err2 := convert(chosen, TmpImage)
+	if strings.HasPrefix(chosen, InboxDir) {
+		os.Remove(chosen)
+	}
 
 	if err := errors.Join(err1, err2); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -63,12 +94,40 @@ func consume(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Header().Set("Cache-Control", "no-cache")
-	http.ServeFile(w, req, "./tmp.bmp")
-	index = (index + 1) % len(entries)
+	http.ServeFile(w, req, TmpImage)
+}
+
+func upload(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	req.ParseMultipartForm(10 << 20)
+
+	file, _, err := req.FormFile("image")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Fatal(err)
+		return
+	}
+	defer file.Close()
+
+	timestamp := strings.Fields(time.Now().String())
+	filename := fmt.Sprintf("%s/%s_%s.png", InboxDir, timestamp[0], timestamp[1])
+	dest, err := os.Create(filename)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	io.Copy(dest, file)
 }
 
 func main() {
 	http.HandleFunc("/consume", consume)
+	http.HandleFunc("/upload", upload)
 
 	if err := http.ListenAndServe(":8090", nil); err != nil {
 		log.Fatal(err)
