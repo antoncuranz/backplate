@@ -25,8 +25,25 @@ const TmpImage = "./tmp.bmp"
 
 var index = 0
 
+func listFiles(folder string) ([]os.DirEntry, error) {
+	files, err := os.ReadDir(folder)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []os.DirEntry
+	for _, file := range files {
+		// ignore hidden files (.gitkeep, .DS_store)
+		if !strings.HasPrefix(file.Name(), ".") {
+			result = append(result, file)
+		}
+	}
+
+	return result, nil
+}
+
 func chooseImage() (string, error) {
-	inboxEntries, _ := os.ReadDir(InboxDir)
+	inboxEntries, _ := listFiles(InboxDir)
 
 	if len(inboxEntries) > 0 {
 		chosen := fmt.Sprintf("%s/%s", InboxDir, inboxEntries[0].Name())
@@ -34,7 +51,7 @@ func chooseImage() (string, error) {
 		return chosen, nil
 	}
 
-	entries, err := os.ReadDir(ImageDir)
+	entries, err := listFiles(ImageDir)
 	if err != nil {
 		return "", err
 	}
@@ -73,10 +90,21 @@ func convert(srcPath string, dstPath string) error {
 		grayColor := color.Gray16{Y: grayValue}
 		palette[i] = grayColor
 	}
+	palette2 := []color.Color{
+		color.Gray16{Y: 0x0000},
+		color.Gray16{Y: 0x4b4b},
+		color.Gray16{Y: 0x5555},
+		color.Gray16{Y: 0x6b6b},
+		color.Gray16{Y: 0x8282},
+		color.Gray16{Y: 0x9696},
+		color.Gray16{Y: 0xbaba},
+		color.Gray16{Y: 0xd2d2},
+	}
 
-	d := dither.NewDitherer(palette)
+	d := dither.NewDitherer(palette2)
 	d.Matrix = dither.FloydSteinberg
-	dithered := d.Dither(gray)
+	dithered := d.DitherPaletted(gray)
+	dithered.Palette = palette
 
 	return bmp.Encode(outfile, dithered)
 }
