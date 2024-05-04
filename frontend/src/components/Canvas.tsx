@@ -3,11 +3,10 @@ import React, {useRef, useEffect, MouseEvent, TouchEvent, useImperativeHandle} f
 interface Props {
   lineWidth: number,
   color: string,
-  scale: number
 }
 
 const Canvas = React.forwardRef<HTMLCanvasElement, Props>(
-  ({lineWidth, color, scale}: Props, forwardedRef: React.ForwardedRef<HTMLCanvasElement>) => {
+  ({lineWidth, color}: Props, forwardedRef: React.ForwardedRef<HTMLCanvasElement>) => {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     useImperativeHandle(forwardedRef, () => canvasRef.current!);
@@ -45,24 +44,28 @@ const Canvas = React.forwardRef<HTMLCanvasElement, Props>(
     let x = 0, y = 0;
     let isMouseDown = false;
 
+    function calculateScale() {
+      return canvasRef.current!.offsetWidth / 820;
+    }
+
     function startDrawing(event: MouseEvent) {
       isMouseDown = true;
-      x = (event.nativeEvent.offsetX) / scale;
-      y = (event.nativeEvent.offsetY) / scale;
+      x = (event.nativeEvent.offsetX) / calculateScale();
+      y = (event.nativeEvent.offsetY) / calculateScale();
     }
 
     function startDrawingTouch(event: TouchEvent) {
       isMouseDown = true;
       const rect = canvasRef.current!.getBoundingClientRect()
       const touch = event.targetTouches[0];
-      x = (touch.clientX - rect.x) / scale;
-      y = (touch.clientY - rect.y) / scale;
+      x = (touch.clientX - rect.x) / calculateScale();
+      y = (touch.clientY - rect.y) / calculateScale();
     }
 
     function drawLine(event: MouseEvent) {
       if (isMouseDown) {
-        const newX = event.nativeEvent.offsetX / scale;
-        const newY = event.nativeEvent.offsetY / scale;
+        const newX = event.nativeEvent.offsetX / calculateScale();
+        const newY = event.nativeEvent.offsetY / calculateScale();
         const context = canvasRef.current!.getContext("2d")!
         context.beginPath();
         context.moveTo(x, y);
@@ -77,8 +80,8 @@ const Canvas = React.forwardRef<HTMLCanvasElement, Props>(
       if (isMouseDown) {
         const rect = canvasRef.current!.getBoundingClientRect()
         const touch = event.targetTouches[0];
-        const newX = (touch.clientX - rect.x) / scale;
-        const newY = (touch.clientY - rect.y) / scale;
+        const newX = (touch.clientX - rect.x) / calculateScale();
+        const newY = (touch.clientY - rect.y) / calculateScale();
         const context = canvasRef.current!.getContext("2d")!
         context.beginPath();
         context.moveTo(x, y);
@@ -103,7 +106,6 @@ const Canvas = React.forwardRef<HTMLCanvasElement, Props>(
                    onTouchEnd={stopDrawing}
                    onTouchCancel={stopDrawing}
                    width="820" height="1200"
-                   style={{width: 820 * scale, height: 1200 * scale}}
     ></canvas>
   })
 

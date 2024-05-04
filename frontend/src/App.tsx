@@ -4,24 +4,18 @@ import {Button} from "@/components/ui/button.tsx";
 import {Slider} from "@/components/ui/slider.tsx";
 import {ToggleGroup, ToggleGroupItem} from "@/components/ui/toggle-group.tsx";
 import Canvas from "@/components/Canvas.tsx";
-import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
+import {Card, CardContent} from "@/components/ui/card.tsx";
 import {toast, Toaster} from "sonner";
+import {Separator} from "@/components/ui/separator.tsx";
+import {Label} from "@/components/ui/label.tsx";
 
 function App() {
   const colors = ["#000000", "#333333", "#666666", "#999999", "#CCCCCC", "#E6E6E6", "#F2F2F2", "#FFFFFF"];
-  const initialLineWidth = 15;
+  const initialLineWidth = 40;
 
   const [lineWidth, setLineWidth] = useState(initialLineWidth)
   const [color, setColor] = useState("black")
-  const [scale, _] = useState(calculateScale)
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  function calculateScale() {
-    if (window.innerWidth < 820)
-      return window.innerWidth / 820;
-    else
-      return 1;
-  }
 
   function clearImage() {
     const canvas = canvasRef.current!
@@ -31,7 +25,6 @@ function App() {
   }
 
   function submitImage() {
-    toast("Hallo")
     canvasRef.current!.toBlob(function (blob) {
       const formData = new FormData();
       formData.append('image', blob!);
@@ -46,37 +39,55 @@ function App() {
   }
 
   return (<>
-    <Card>
-      <CardHeader>
-        <CardTitle>Hey! 👋🏻</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form>
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <ToggleGroup variant="outline" type="single" onValueChange={x => setColor(x)}>
-                {colors.map(color => (
-                  <ToggleGroupItem key={color} value={color} className={"color-button"}>
-                    <div className="color-div" style={{background: color, borderColor: color}}></div>
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-              <Slider className="slider" defaultValue={[initialLineWidth]} min={1} max={72}
-                      onValueChange={x => setLineWidth(x[0])}/>
-            </div>
-          </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <div>
-          <Button variant="outline" style={{marginRight: "10px"}} onClick={clearImage}>Clear</Button>
-          {/*<Button variant="outline">Undo</Button>*/}
+    <div className="hidden h-full flex-col md:flex">
+      <div
+        className="container flex flex-col items-start justify-between space-y-2 py-4 sm:flex-row sm:items-center sm:space-y-0 md:h-16">
+        <h2 className="text-lg font-semibold">Backplate</h2>
+        <div className="ml-auto flex w-full space-x-2 sm:justify-end">
+          preset was here
         </div>
-        <Button onClick={submitImage}>Submit</Button>
-      </CardFooter>
-    </Card>
-    <Canvas ref={canvasRef} lineWidth={lineWidth} color={color} scale={scale}></Canvas>
-    <Toaster />
+      </div>
+      <Separator/>
+    </div>
+    <div className="container gap-4 main-container">
+      <Card className="canvas-card">
+        <CardContent style={{padding: 0, height: "100%"}}>
+          <Canvas ref={canvasRef} lineWidth={lineWidth} color={color}></Canvas>
+        </CardContent>
+      </Card>
+      <div className="pt-4 tools-container">
+        <div className="grid gap-4" style={{marginBottom: "14px"}}>
+          <div className="flex items-center justify-between">
+            <Label>Color</Label>
+          </div>
+          <ToggleGroup id="colors-togglegroup" variant="outline" type="single" onValueChange={x => setColor(x)} defaultValue="#000000">
+            {colors.map(color => (
+              <ToggleGroupItem key={color} value={color} className={"color-button"}>
+                <div className="color-div" style={{background: color, borderColor: color}}></div>
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </div>
+
+        <div className="grid gap-4" style={{marginBottom: "28px"}}>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="lineWidth">Line Width</Label>
+            <span
+              className="w-12 rounded-md border border-transparent px-2 py-0.5 text-right text-sm text-muted-foreground hover:border-border">
+                {lineWidth}
+              </span>
+          </div>
+          <Slider id="lineWidth" className="slider" defaultValue={[initialLineWidth]} min={20} max={200}
+                  onValueChange={x => setLineWidth(x[0])}/>
+        </div>
+        <div className="gap-4 button-container" style={{display: "flex"}}>
+          <Button variant="outline" onClick={clearImage}>Clear</Button>
+          {/*<Button variant="outline">Undo</Button>*/}
+          <Button onClick={submitImage}>Submit</Button>
+        </div>
+      </div>
+    </div>
+    <Toaster/>
   </>)
 }
 
