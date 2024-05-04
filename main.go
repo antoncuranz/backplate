@@ -154,6 +154,9 @@ func upload(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	frontend := http.FileServer(http.Dir("./frontend/dist"))
+	http.Handle("/", frontend)
+
 	http.HandleFunc("/consume", consume)
 	http.HandleFunc("/upload", upload)
 

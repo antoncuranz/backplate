@@ -6,7 +6,7 @@ import {ToggleGroup, ToggleGroupItem} from "@/components/ui/toggle-group.tsx";
 import Canvas from "@/components/Canvas.tsx";
 import {Card, CardContent} from "@/components/ui/card.tsx";
 import {toast, Toaster} from "sonner";
-import {Separator} from "@/components/ui/separator.tsx";
+// import {Separator} from "@/components/ui/separator.tsx";
 import {Label} from "@/components/ui/label.tsx";
 
 function App() {
@@ -29,7 +29,7 @@ function App() {
       const formData = new FormData();
       formData.append('image', blob!);
 
-      fetch('http://192.168.1.20:8090/upload', {
+      fetch('./upload', {
         method: 'POST', body: formData,
       }).then(() => {
         clearImage()
@@ -39,16 +39,16 @@ function App() {
   }
 
   return (<>
-    <div className="hidden h-full flex-col md:flex">
-      <div
-        className="container flex flex-col items-start justify-between space-y-2 py-4 sm:flex-row sm:items-center sm:space-y-0 md:h-16">
-        <h2 className="text-lg font-semibold">Backplate</h2>
-        <div className="ml-auto flex w-full space-x-2 sm:justify-end">
-          preset was here
-        </div>
-      </div>
-      <Separator/>
-    </div>
+    {/*<div className="hidden h-full flex-col md:flex">*/}
+    {/*  <div*/}
+    {/*    className="container flex flex-col items-start justify-between space-y-2 py-4 sm:flex-row sm:items-center sm:space-y-0 md:h-16">*/}
+    {/*    <h2 className="text-lg font-semibold">Backplate</h2>*/}
+    {/*    <div className="ml-auto flex w-full space-x-2 sm:justify-end">*/}
+    {/*      preset was here*/}
+    {/*    </div>*/}
+    {/*  </div>*/}
+    {/*  <Separator/>*/}
+    {/*</div>*/}
     <div className="container gap-4 main-container">
       <Card className="canvas-card">
         <CardContent style={{padding: 0, height: "100%"}}>
