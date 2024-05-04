@@ -33,7 +33,7 @@ jobs:
         password: ${{ github.token }}
 
     - name: Build Docker image
-      run: docker build -t antoncuranz/backplate:latest .
+      run: docker build -t ghcr.io/antoncuranz/backplate:latest .
 
     - name: Push Docker image to Docker Hub
       run: docker push ghcr.io/antoncuranz/backplate:latest
