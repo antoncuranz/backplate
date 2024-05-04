@@ -35,5 +35,5 @@ jobs:
     - name: Build Docker image
       run: docker build -t ghcr.io/antoncuranz/backplate:latest .
 
-    - name: Push Docker image to Docker Hub
+    - name: Push Docker image to GHCR.io
       run: docker push ghcr.io/antoncuranz/backplate:latest
