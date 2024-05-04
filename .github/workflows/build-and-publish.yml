@@ -16,9 +16,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Use Node.js
-      working-directory: frontend/
       uses: actions/setup-node@v3
       with:
+        working-directory: frontend/
         node-version: 22.x
         cache: 'npm'
     - name: Install dependencies and build frontend
