@@ -201,7 +201,6 @@ const updateDevice = `-- name: UpdateDevice :exec
 UPDATE devices
 SET name = $2, token = $3, last_sync = $4, sleeps_until = $5
 WHERE id = $1
-RETURNING id, name, token, last_sync, sleeps_until
 `
 
 type UpdateDeviceParams struct {
@@ -227,7 +226,6 @@ const updateImage = `-- name: UpdateImage :exec
 UPDATE images
 SET device_id = $2, permanent = $3, data_original = $4, data_processed = $5
 WHERE id = $1
-RETURNING id, device_id, permanent, data_original, data_processed
 `
 
 type UpdateImageParams struct {
