@@ -1,0 +1,17 @@
+version: '3.3'
+
+volumes:
+  db_data:
+
+services:
+  postgres:
+    restart: unless-stopped
+    image: postgres:13.0-alpine
+    environment:
+      - DEBUG=false
+      - POSTGRES_DB=backplate
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5432:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
