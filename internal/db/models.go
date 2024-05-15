@@ -5,15 +5,15 @@
 package db
 
 import (
-	"github.com/jackc/pgx/v5/pgtype"
+	null "github.com/guregu/null/v5"
 )
 
 type Device struct {
 	ID          int64
 	Name        string
 	Token       string
-	LastSync    pgtype.Timestamp
-	SleepsUntil pgtype.Timestamp
+	LastSync    null.Time
+	SleepsUntil null.Time
 }
 
 type Image struct {

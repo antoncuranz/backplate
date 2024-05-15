@@ -1,4 +1,14 @@
 version: "2"
+overrides:
+  go:
+    overrides:
+      - db_type: "timestamptz"
+        nullable: true
+        engine: "postgresql"
+        go_type:
+          import: "github.com/guregu/null/v5"
+          package: "null"
+          type: "Time"
 sql:
   - engine: "postgresql"
     queries: "internal/db/query.sql"

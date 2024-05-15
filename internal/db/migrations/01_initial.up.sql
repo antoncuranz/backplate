@@ -2,8 +2,8 @@ create table devices (
     id bigint primary key generated always as identity,
     name text not null,
     token text not null,
-    last_sync timestamp,
-    sleeps_until timestamp
+    last_sync timestamptz,
+    sleeps_until timestamptz
 );
 
 create table images (

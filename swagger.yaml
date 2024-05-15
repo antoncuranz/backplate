@@ -2,11 +2,11 @@ definitions:
     CreateDeviceParams:
         properties:
             LastSync:
-                $ref: '#/definitions/Timestamp'
+                type: string
             Name:
                 type: string
             SleepsUntil:
-                $ref: '#/definitions/Timestamp'
+                type: string
             Token:
                 type: string
         type: object
@@ -16,7 +16,6 @@ definitions:
             Device:
                 $ref: '#/definitions/Device'
         type: object
-        x-go-name: UpdateDeviceResponse
         x-go-package: backplate/cmd/api
     CreateImageResponse:
         properties:
@@ -30,11 +29,11 @@ definitions:
                 format: int64
                 type: integer
             LastSync:
-                $ref: '#/definitions/Timestamp'
+                type: string
             Name:
                 type: string
             SleepsUntil:
-                $ref: '#/definitions/Timestamp'
+                type: string
             Token:
                 type: string
         type: object
@@ -61,10 +60,6 @@ definitions:
                 type: boolean
         type: object
         x-go-package: backplate/internal/db
-    InfinityModifier:
-        format: int8
-        type: integer
-        x-go-package: github.com/jackc/pgx/v5/pgtype
     ListDevicesResponse:
         properties:
             Devices:
@@ -81,33 +76,27 @@ definitions:
                 type: array
         type: object
         x-go-package: backplate/cmd/api
-    Timestamp:
-        properties:
-            InfinityModifier:
-                $ref: '#/definitions/InfinityModifier'
-            Time:
-                format: date-time
-                type: string
-            Valid:
-                type: boolean
-        title: Timestamp represents the PostgreSQL timestamp type.
-        type: object
-        x-go-package: github.com/jackc/pgx/v5/pgtype
     UpdateDeviceParams:
         properties:
             ID:
                 format: int64
                 type: integer
             LastSync:
-                $ref: '#/definitions/Timestamp'
+                type: string
             Name:
                 type: string
             SleepsUntil:
-                $ref: '#/definitions/Timestamp'
+                type: string
             Token:
                 type: string
         type: object
         x-go-package: backplate/internal/db
+    UpdateDeviceResponse:
+        properties:
+            Device:
+                $ref: '#/definitions/Device'
+        type: object
+        x-go-package: backplate/cmd/api
 host: localhost:8090
 info:
     title: 'Backplate Api:'
@@ -198,7 +187,9 @@ paths:
                     $ref: '#/definitions/UpdateDeviceParams'
             responses:
                 "201":
-                    $ref: '#/responses/UpdateDeviceResponse'
+                    description: UpdateDeviceResponse
+                    schema:
+                        $ref: '#/definitions/UpdateDeviceResponse'
             tags:
                 - Devices
     /images:

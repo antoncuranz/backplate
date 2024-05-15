@@ -116,7 +116,7 @@ type UpdateDeviceRequest struct {
 	Body db.UpdateDeviceParams
 }
 
-// swagger:model CreateDeviceResponse
+// swagger:model UpdateDeviceResponse
 type UpdateDeviceResponse struct {
 	Device db.Device
 }

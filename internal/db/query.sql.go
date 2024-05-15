@@ -8,7 +8,7 @@ package db
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	null "github.com/guregu/null/v5"
 )
 
 const createDevice = `-- name: CreateDevice :one
@@ -23,8 +23,8 @@ RETURNING id, name, token, last_sync, sleeps_until
 type CreateDeviceParams struct {
 	Name        string
 	Token       string
-	LastSync    pgtype.Timestamp
-	SleepsUntil pgtype.Timestamp
+	LastSync    null.Time
+	SleepsUntil null.Time
 }
 
 func (q *Queries) CreateDevice(ctx context.Context, arg CreateDeviceParams) (Device, error) {
@@ -207,8 +207,8 @@ type UpdateDeviceParams struct {
 	ID          int64
 	Name        string
 	Token       string
-	LastSync    pgtype.Timestamp
-	SleepsUntil pgtype.Timestamp
+	LastSync    null.Time
+	SleepsUntil null.Time
 }
 
 func (q *Queries) UpdateDevice(ctx context.Context, arg UpdateDeviceParams) error {
