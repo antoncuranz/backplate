@@ -1,0 +1,230 @@
+definitions:
+    CreateDeviceParams:
+        properties:
+            LastSync:
+                $ref: '#/definitions/Timestamp'
+            Name:
+                type: string
+            SleepsUntil:
+                $ref: '#/definitions/Timestamp'
+            Token:
+                type: string
+        type: object
+        x-go-package: backplate/internal/db
+    CreateDeviceResponse:
+        properties:
+            Device:
+                $ref: '#/definitions/Device'
+        type: object
+        x-go-name: UpdateDeviceResponse
+        x-go-package: backplate/cmd/api
+    CreateImageResponse:
+        properties:
+            Image:
+                $ref: '#/definitions/Image'
+        type: object
+        x-go-package: backplate/cmd/api
+    Device:
+        properties:
+            ID:
+                format: int64
+                type: integer
+            LastSync:
+                $ref: '#/definitions/Timestamp'
+            Name:
+                type: string
+            SleepsUntil:
+                $ref: '#/definitions/Timestamp'
+            Token:
+                type: string
+        type: object
+        x-go-package: backplate/internal/db
+    GetDeviceResponse:
+        properties:
+            Device:
+                $ref: '#/definitions/Device'
+        type: object
+        x-go-package: backplate/cmd/api
+    Image:
+        properties:
+            DataOriginal:
+                type: string
+            DataProcessed:
+                type: string
+            DeviceID:
+                format: int64
+                type: integer
+            ID:
+                format: int64
+                type: integer
+            Permanent:
+                type: boolean
+        type: object
+        x-go-package: backplate/internal/db
+    InfinityModifier:
+        format: int8
+        type: integer
+        x-go-package: github.com/jackc/pgx/v5/pgtype
+    ListDevicesResponse:
+        properties:
+            Devices:
+                items:
+                    $ref: '#/definitions/Device'
+                type: array
+        type: object
+        x-go-package: backplate/cmd/api
+    ListImagesResponse:
+        properties:
+            Images:
+                items:
+                    $ref: '#/definitions/Image'
+                type: array
+        type: object
+        x-go-package: backplate/cmd/api
+    Timestamp:
+        properties:
+            InfinityModifier:
+                $ref: '#/definitions/InfinityModifier'
+            Time:
+                format: date-time
+                type: string
+            Valid:
+                type: boolean
+        title: Timestamp represents the PostgreSQL timestamp type.
+        type: object
+        x-go-package: github.com/jackc/pgx/v5/pgtype
+    UpdateDeviceParams:
+        properties:
+            ID:
+                format: int64
+                type: integer
+            LastSync:
+                $ref: '#/definitions/Timestamp'
+            Name:
+                type: string
+            SleepsUntil:
+                $ref: '#/definitions/Timestamp'
+            Token:
+                type: string
+        type: object
+        x-go-package: backplate/internal/db
+host: localhost:8090
+info:
+    title: 'Backplate Api:'
+    version: 0.0.1
+paths:
+    /consume:
+        get:
+            description: Consume an image
+            operationId: consumeImageHandler
+            tags:
+                - Consume
+    /devices:
+        get:
+            description: List all devices
+            operationId: listDevicesHandler
+            responses:
+                "200":
+                    description: ListDevicesResponse
+                    schema:
+                        $ref: '#/definitions/ListDevicesResponse'
+            tags:
+                - Devices
+        post:
+            consumes:
+                - application/json
+            description: Create a new device
+            operationId: createDeviceHandler
+            parameters:
+                - in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/CreateDeviceParams'
+            responses:
+                "201":
+                    description: CreateDeviceResponse
+                    schema:
+                        $ref: '#/definitions/CreateDeviceResponse'
+            tags:
+                - Devices
+    /devices/{id}:
+        delete:
+            description: Delete a device
+            operationId: deleteDeviceHandler
+            parameters:
+                - format: int64
+                  in: path
+                  name: id
+                  required: true
+                  type: integer
+                  x-go-name: ID
+            responses:
+                "204":
+                    description: ""
+            tags:
+                - Devices
+        get:
+            description: Get a device
+            operationId: getDeviceHandler
+            parameters:
+                - format: int64
+                  in: path
+                  name: id
+                  required: true
+                  type: integer
+                  x-go-name: ID
+            responses:
+                "200":
+                    description: GetDeviceResponse
+                    schema:
+                        $ref: '#/definitions/GetDeviceResponse'
+            tags:
+                - Devices
+        put:
+            consumes:
+                - application/json
+            description: Update a device
+            operationId: updateDeviceHandler
+            parameters:
+                - format: int64
+                  in: path
+                  name: id
+                  required: true
+                  type: integer
+                  x-go-name: ID
+                - in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/UpdateDeviceParams'
+            responses:
+                "201":
+                    $ref: '#/responses/UpdateDeviceResponse'
+            tags:
+                - Devices
+    /images:
+        get:
+            description: List all images
+            operationId: listImagesHandler
+            responses:
+                "200":
+                    description: ListImagesResponse
+                    schema:
+                        $ref: '#/definitions/ListImagesResponse'
+            tags:
+                - Images
+        post:
+            description: Upload a new image
+            operationId: createImageHandler
+            responses:
+                "201":
+                    description: CreateImageResponse
+                    schema:
+                        $ref: '#/definitions/CreateImageResponse'
+            tags:
+                - Images
+produces:
+    - application/json
+schemes:
+    - http
+    - https
+swagger: "2.0"

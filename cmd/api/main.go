@@ -43,8 +43,11 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/images", app.createImageHandler)
 	router.HandlerFunc(http.MethodGet, "/consume", app.consumeImageHandler)
 
-	router.HandlerFunc(http.MethodGet, "/devices", app.listDevicesHandler)
 	router.HandlerFunc(http.MethodPost, "/devices", app.createDeviceHandler)
+	router.HandlerFunc(http.MethodGet, "/devices", app.listDevicesHandler)
+	router.HandlerFunc(http.MethodGet, "/devices/:id", app.getDeviceHandler)
+	router.HandlerFunc(http.MethodPut, "/devices/:id", app.updateDeviceHandler)
+	router.HandlerFunc(http.MethodDelete, "/devices/:id", app.deleteDeviceHandler)
 
 	var handler http.Handler = router
 

@@ -7,24 +7,33 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createDevice = `-- name: CreateDevice :one
 INSERT INTO devices (
-    name, token
+    name, token, last_sync, sleeps_until
 ) VALUES (
-             $1, $2
-         )
+    $1, $2, $3, $4
+)
 RETURNING id, name, token, last_sync, sleeps_until
 `
 
 type CreateDeviceParams struct {
-	Name  string
-	Token string
+	Name        string
+	Token       string
+	LastSync    pgtype.Timestamp
+	SleepsUntil pgtype.Timestamp
 }
 
 func (q *Queries) CreateDevice(ctx context.Context, arg CreateDeviceParams) (Device, error) {
-	row := q.db.QueryRow(ctx, createDevice, arg.Name, arg.Token)
+	row := q.db.QueryRow(ctx, createDevice,
+		arg.Name,
+		arg.Token,
+		arg.LastSync,
+		arg.SleepsUntil,
+	)
 	var i Device
 	err := row.Scan(
 		&i.ID,
@@ -38,20 +47,27 @@ func (q *Queries) CreateDevice(ctx context.Context, arg CreateDeviceParams) (Dev
 
 const createImage = `-- name: CreateImage :one
 INSERT INTO images (
-    device_id, permanent
+    device_id, permanent, data_original, data_processed
 ) VALUES (
-    $1, $2
+    $1, $2, $3, $4
 )
 RETURNING id, device_id, permanent, data_original, data_processed
 `
 
 type CreateImageParams struct {
-	DeviceID  int64
-	Permanent bool
+	DeviceID      int64
+	Permanent     bool
+	DataOriginal  string
+	DataProcessed string
 }
 
 func (q *Queries) CreateImage(ctx context.Context, arg CreateImageParams) (Image, error) {
-	row := q.db.QueryRow(ctx, createImage, arg.DeviceID, arg.Permanent)
+	row := q.db.QueryRow(ctx, createImage,
+		arg.DeviceID,
+		arg.Permanent,
+		arg.DataOriginal,
+		arg.DataProcessed,
+	)
 	var i Image
 	err := row.Scan(
 		&i.ID,
@@ -179,4 +195,56 @@ func (q *Queries) ListImages(ctx context.Context) ([]Image, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateDevice = `-- name: UpdateDevice :exec
+UPDATE devices
+SET name = $2, token = $3, last_sync = $4, sleeps_until = $5
+WHERE id = $1
+RETURNING id, name, token, last_sync, sleeps_until
+`
+
+type UpdateDeviceParams struct {
+	ID          int64
+	Name        string
+	Token       string
+	LastSync    pgtype.Timestamp
+	SleepsUntil pgtype.Timestamp
+}
+
+func (q *Queries) UpdateDevice(ctx context.Context, arg UpdateDeviceParams) error {
+	_, err := q.db.Exec(ctx, updateDevice,
+		arg.ID,
+		arg.Name,
+		arg.Token,
+		arg.LastSync,
+		arg.SleepsUntil,
+	)
+	return err
+}
+
+const updateImage = `-- name: UpdateImage :exec
+UPDATE images
+SET device_id = $2, permanent = $3, data_original = $4, data_processed = $5
+WHERE id = $1
+RETURNING id, device_id, permanent, data_original, data_processed
+`
+
+type UpdateImageParams struct {
+	ID            int64
+	DeviceID      int64
+	Permanent     bool
+	DataOriginal  string
+	DataProcessed string
+}
+
+func (q *Queries) UpdateImage(ctx context.Context, arg UpdateImageParams) error {
+	_, err := q.db.Exec(ctx, updateImage,
+		arg.ID,
+		arg.DeviceID,
+		arg.Permanent,
+		arg.DataOriginal,
+		arg.DataProcessed,
+	)
+	return err
 }
