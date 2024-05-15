@@ -2,6 +2,8 @@ package main
 
 import (
 	"backplate/internal/db"
+	"backplate/internal/service"
+	"errors"
 	"net/http"
 )
 
@@ -47,13 +49,18 @@ type GetDeviceResponse struct {
 func (app *application) getDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		app.notFoundResponse(w, r)
 		return
 	}
 
 	device, err := app.service.GetDevice(r.Context(), id)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, service.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 
@@ -123,15 +130,31 @@ type UpdateDeviceResponse struct {
 //	201: UpdateDeviceResponse
 func (app *application) updateDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	var input UpdateDeviceRequest
-	err := app.readJSON(w, r, &input.Body)
+	var err error
+
+	input.ID, err = app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	err = app.readJSON(w, r, &input.Body)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
 
+	// path id has higher priority than id in body
+	input.Body.ID = input.ID
+
 	device, err := app.service.UpdateDevice(r.Context(), input.Body)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, service.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 
@@ -149,13 +172,18 @@ func (app *application) updateDeviceHandler(w http.ResponseWriter, r *http.Reque
 func (app *application) deleteDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		app.notFoundResponse(w, r)
 		return
 	}
 
 	err = app.service.DeleteDevice(r.Context(), id)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, service.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 

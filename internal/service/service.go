@@ -1,6 +1,9 @@
 package service
 
-import "backplate/internal/db"
+import (
+	"backplate/internal/db"
+	"errors"
+)
 
 type ServiceConfig struct {
 	InboxDir string `envconfig:"INBOX_DIR" default:"inbox"`
@@ -11,3 +14,5 @@ type Service struct {
 	Store  *db.Queries
 	Config ServiceConfig
 }
+
+var ErrRecordNotFound = errors.New("record not found")
