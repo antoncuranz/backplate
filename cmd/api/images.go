@@ -2,8 +2,10 @@ package main
 
 import (
 	"backplate/internal/db"
+	"errors"
 	"mime/multipart"
 	"net/http"
+	"strconv"
 )
 
 // swagger:model ListImagesResponse
@@ -30,7 +32,9 @@ func (app *application) listImagesHandler(w http.ResponseWriter, r *http.Request
 }
 
 // swagger:parameters createImageHandler
-type _ struct {
+type CreateImageRequest struct {
+	// in: formData
+	DeviceId int64 `json:"deviceId"`
 	// in: formData
 	// swagger:file
 	ImageFile multipart.File `json:"image"`
@@ -50,14 +54,18 @@ func (app *application) createImageHandler(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	r.ParseMultipartForm(10 << 20)
 
+	deviceId, err := strconv.ParseInt(r.FormValue("deviceId"), 10, 64)
+	if err != nil || deviceId < 1 {
+		app.badRequestResponse(w, r, errors.New("unable to read deviceId"))
+	}
 	file, _, err := r.FormFile("image")
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		app.badRequestResponse(w, r, errors.New("unable to read file"))
 		return
 	}
 	defer file.Close()
 
-	image, err := app.service.CreateImage(r.Context(), file)
+	image, err := app.service.CreateImage(r.Context(), file, deviceId)
 
 	err = app.writeJSON(w, http.StatusCreated, CreateImageResponse{Image: image}, make(http.Header))
 	if err != nil {

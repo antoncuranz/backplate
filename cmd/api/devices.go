@@ -9,7 +9,7 @@ import (
 
 // swagger:parameters deleteDeviceHandler getDeviceHandler
 type _ struct {
-	// in: path
+	// in:path
 	ID int64 `json:"id"`
 }
 
@@ -110,7 +110,7 @@ func (app *application) createDeviceHandler(w http.ResponseWriter, r *http.Reque
 
 // swagger:parameters updateDeviceHandler
 type UpdateDeviceRequest struct {
-	// in: path
+	// in:path
 	ID int64 `json:"id"`
 	// in:body
 	Body db.UpdateDeviceParams

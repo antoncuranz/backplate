@@ -6,8 +6,8 @@ import (
 )
 
 type ServiceConfig struct {
-	InboxDir string `envconfig:"INBOX_DIR" default:"inbox"`
-	ImageDir string `envconfig:"IMAGES_DIR" default:"images"`
+	InboxDir string `envconfig:"INBOX_DIR" default:"inbox/"`
+	ImageDir string `envconfig:"IMAGES_DIR" default:"images/"`
 }
 
 type Service struct {

@@ -5,26 +5,42 @@ import (
 	"backplate/internal/img"
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"io"
 	"mime/multipart"
 	"os"
 	"strings"
-	"time"
 )
 
-func (s *Service) CreateImage(ctx context.Context, file multipart.File) (db.Image, error) {
-	timestamp := strings.Fields(time.Now().String())
-	filename := fmt.Sprintf("%s/%s_%s.png", s.Config.InboxDir, timestamp[0], timestamp[1])
-	dest, err := os.Create(filename)
+const OriginalPrefix = "original/"
+const InboxPrefix = "inbox/"
+
+func (s *Service) CreateImage(ctx context.Context, file multipart.File, deviceId int64) (db.Image, error) {
+	filename := uuid.New().String()
+
+	// save original
+	originalFile := s.Config.ImageDir + OriginalPrefix + filename + ".png"
+	dest, err := os.Create(originalFile)
+	if err != nil {
+		return db.Image{}, err
+	}
+	_, err = io.Copy(dest, file)
 	if err != nil {
 		return db.Image{}, err
 	}
 
-	io.Copy(dest, file)
+	// process image
+	processedFile := s.Config.ImageDir + filename + ".bmp"
+	err = img.Convert(originalFile, processedFile)
+	if err != nil {
+		return db.Image{}, err
+	}
 
 	params := db.CreateImageParams{
-		DeviceID:  0,
-		Permanent: true,
+		DeviceID:      deviceId,
+		Permanent:     true,
+		DataOriginal:  originalFile,
+		DataProcessed: processedFile,
 	}
 
 	return s.Store.CreateImage(ctx, params)
@@ -34,7 +50,7 @@ func (s *Service) ListImages(ctx context.Context) ([]db.Image, error) {
 	return s.Store.ListImages(ctx)
 }
 
-func (s *Service) ConsumeImage() (string, error) {
+func (s *Service) ConsumeImage(token string) (string, error) {
 	chosen, err := s.chooseImage()
 	if err != nil {
 		return "", err
@@ -70,7 +86,7 @@ func (s *Service) chooseImage() (string, error) {
 		return "", err
 	}
 
-	chosen := fmt.Sprintf("%s/%s", s.Config.ImageDir, entries[index].Name())
+	chosen := fmt.Sprintf("%s%s", s.Config.ImageDir, entries[index].Name())
 	index = (index + 1) % len(entries)
 
 	fmt.Println(chosen)
